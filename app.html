@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Навигатор по взрослой жизни</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg: #f1f5f9;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --accent: #3b82f6;
+      --border: #e2e8f0;
+      --radius: 20px;
+      --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+      min-height: 100vh;
+    }
+
+    /* Телефонный фрейм */
+    .phone {
+      width: 100%;
+      max-width: 390px;
+      background: #fff;
+      border-radius: 36px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 84vh;
+    }
+
+    .screen {
+      padding: 20px 18px 100px;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Заголовок приложения */
+    .app-header {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .app-header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .app-header .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    /* Сферы */
+    .sphere {
+      margin-bottom: 30px;
+    }
+
+    .sphere-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.3px;
+    }
+
+    /* Сетка карточек 2 колонки */
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px 18px;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s ease, box-shadow 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card:active {
+      transform: scale(0.94);
+    }
+
+    .card:hover {
+      transform: scale(1.03);
+      border-color: var(--accent);
+      box-shadow: 0 12px 24px rgba(59, 130, 246, 0.12);
+    }
+
+    /* Цветовые акценты по сферам */
+    .card-housing {
+      border-left: 4px solid #3b82f6;
+      background: #eff6ff;
+    }
+
+    .card-money {
+      border-left: 4px solid #22c55e;
+      background: #f0fdf4;
+    }
+
+    .card-health {
+      border-left: 4px solid #a855f7;
+      background: #faf5ff;
+    }
+
+    .card-career {
+      border-left: 4px solid #fb923c;
+      background: #fff7ed;
+    }
+
+    .card-security {
+      border-left: 4px solid #ef4444;
+      background: #fff1f2;
+    }
+
+    /* Анимация появления экрана */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* Иконка в заголовке детального экрана */
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 26px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Чек-лист с кликабельными шагами */
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .checklist-item input[type="checkbox"] {
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border: 2px solid #cbd5e1;
+      border-radius: 7px;
+      background: #fff;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .checklist-item input[type="checkbox"]:checked {
+      background: #10b981;
+      border-color: #10b981;
+    }
+
+    .checklist-item input[type="checkbox"]:checked::after {
+      content: '✓';
+      color: #fff;
+      font-size: 15px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .checklist-item label {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .checklist-item input[type="checkbox"]:checked + label {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+
+    /* Чек-лист */
+    .checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .checklist-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--accent);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .checklist-item label {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* Красный блок "Проблема?" */
+    .problem-block {
+      background: #fee2e2;
+      border: 1px solid #ef4444;
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: #991b1b;
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.12);
+    }
+
+    .problem-block::before {
+      content: '🚨';
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .problem-title {
+      display: block;
+      font-weight: 800;
+      margin-bottom: 4px;
+    }
+
+    /* Желтая плашка "Проблема?" */
+    .warning-banner {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #92400e;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.12);
+    }
+
+    /* ИИ-секция */
+    .ai-section {
+      width: 100%;
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    #ai-input {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 15px;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.2s ease;
+      box-sizing: border-box;
+      margin-bottom: 10px;
+    }
+
+    #ai-input:focus {
+      border-color: var(--accent);
+    }
+
+    .ai-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+    }
+
+    .ai-btn:hover {
+      background: #2563eb;
+    }
+
+    .ai-btn:active {
+      transform: scale(0.98);
+    }
+
+    .ai-btn.loading {
+      background: #94a3b8;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .ai-response {
+      width: 100%;
+      padding: 14px 16px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+      min-height: 44px;
+      box-sizing: border-box;
+    }
+
+    .ai-response ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .ai-response li {
+      margin-bottom: 6px;
+    }
+
+    .ai-response .ai-error {
+      color: #ef4444;
+      font-weight: 600;
+    }
+
+    /* Нижняя навигация */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 78px;
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border);
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color 0.2s ease;
+      padding: 8px 6px;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+    }
+
+    .nav-item:active {
+      transform: scale(0.92);
+    }
+
+    /* Экран детали */
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 26px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .back-btn {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      line-height: 1;
+    }
+
+    .detail-header h1 {
+      font-size: 19px;
+      font-weight: 800;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .detail-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      text-align: left;
+      padding: 20px 18px;
+      overflow-y: auto;
+    }
+
+    .placeholder {
+      font-size: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-style: italic;
+      max-width: 280px;
+    }
+
+    @media (max-width: 375px) {
+      .phone {
+        max-width: 100%;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: 100vh;
+      }
+    }
+  </style>
+  <!-- SPLIT1 -->
+</head>
+<body>
+
+  <div class="phone">
+    <!-- Главный экран -->
+    <div id="main-screen" class="screen">
+      <header class="app-header">
+        <h1>Навигатор по взрослой жизни</h1>
+        <p class="subtitle">Твоя подсказка в независимости</p>
+      </header>
+
+      <div class="warning-banner">⚠️ Проблема? Выберите сферу ниже, чтобы получить инструкцию.</div>
+
+      <main class="content">
+        <!-- Блок 1 -->
+        <section class="sphere">
+          <h2 class="sphere-title">🏠 Жилье и Быт</h2>
+          <div class="card-grid">
+            <button class="card card-housing" data-topic="remove-first-apartment">🏠 Снять первую квартиру</button>
+            <button class="card card-housing" data-topic="move-in-with-partner">❤️ Съехаться с партнером</button>
+            <button class="card card-housing" data-topic="housing-bill">📄 Пришла квитанция ЖКХ</button>
+            <button class="card card-housing" data-topic="living-with-roommates">🚪 Жизнь с соседями</button>
+          </div>
+        </section>
+
+        <!-- Блок 2 -->
+        <section class="sphere">
+          <h2 class="sphere-title">💰 Деньги и Право</h2>
+          <div class="card-grid">
+            <button class="card card-money" data-topic="self-employment">💻 Самозанятость</button>
+            <button class="card card-money" data-topic="credit-trap">💳 Кредитная ловушка</button>
+            <button class="card card-money" data-topic="paying-taxes">🪙 Плачу налоги</button>
+            <button class="card card-money" data-topic="authority-inaction">🛡️ Бездействие властей</button>
+          </div>
+        </section>
+
+        <!-- Блок 3 -->
+        <section class="sphere">
+          <h2 class="sphere-title">🧠 Здоровье и Ментальность</h2>
+          <div class="card-grid">
+            <button class="card card-health" data-topic="burnout">🧠 Выгорание и психика</button>
+            <button class="card card-health" data-topic="basic-health">🩺 Базовое здоровье</button>
+          </div>
+        </section>
+
+        <!-- Блок 4 -->
+        <section class="sphere">
+          <h2 class="sphere-title">🚀 Карьера и Отдых</h2>
+          <div class="card-grid">
+            <button class="card card-career" data-topic="career-crisis">💼 Кризис карьеры</button>
+            <button class="card card-career" data-topic="vacation-without-parents">✈️ Отпуск без родителей</button>
+          </div>
+        </section>
+
+        <!-- Блок 5 -->
+        <section class="sphere">
+          <h2 class="sphere-title">🛡️ Безопасность и Покупки</h2>
+          <div class="card-grid">
+            <button class="card card-security" data-topic="fraud-protection">🔒 Защита от мошенников</button>
+            <button class="card card-security" data-topic="first-car">🚗 Первая машина</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <!-- Экран выбранной темы -->
+    <div id="detail-screen" class="screen hidden">
+      <header class="detail-header">
+        <button id="back-btn" class="back-btn">← Назад</button>
+        <div id="detail-icon" class="detail-icon">📄</div>
+        <h1 id="detail-title">Тема</h1>
+      </header>
+
+      <div class="detail-content">
+        <div id="detail-content-inner"></div>
+
+        <div class="ai-section">
+          <textarea id="ai-input" placeholder="Задай вопрос по этой теме…" rows="2"></textarea>
+          <button id="ai-btn" class="ai-btn">Спросить ИИ</button>
+          <div class="ai-response" id="ai-response" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const mainScreen = document.getElementById('main-screen');
+    const detailScreen = document.getElementById('detail-screen');
+    const detailTitle = document.getElementById('detail-title');
+    const detailIcon = document.getElementById('detail-icon');
+    const detailContentInner = document.getElementById('detail-content-inner');
+    const backBtn = document.getElementById('back-btn');
+
+    const contentData = {
+      'remove-first-apartment': {
+        title: '🏠 Снять первую квартиру',
+        steps: [
+          'Проверь собственника (попроси паспорт и выписку ЕГРН)',
+          'Осмотри квартиру (счетчики, вода, соседи)',
+          'Подпиши договор (фиксируй депозит и сроки)',
+          'Составь акт приема-передачи с фото'
+        ],
+        problem: 'Собственник просит депозит до просмотра — это мошенник.'
+      },
+      'move-in-with-partner': {
+        title: '❤️ Съехаться с партнером',
+        steps: [
+          'Определите бюджет (поровну, пропорционально или общий котел)',
+          'Разделите быт (кто за что отвечает, а не "помогает")',
+          'Правило крупных покупок (сначала обсуждаем)'
+        ],
+        problem: 'Ссоры из-за денег — заведите общую копилку на быт и оставьте личные 10-15%.'
+      },
+      'housing-bill': {
+        title: '📄 Пришла квитанция ЖКХ',
+        steps: [
+          'Проверь строки (содержание, отопление)',
+          'Сверь показания счетчиков',
+          'Оплати без комиссии (Госуслуги)'
+        ],
+        problem: 'Долг от прошлых жильцов — не плати, требуй сверку.'
+      },
+      'living-with-roommates': {
+        title: '🚪 Жизнь с соседями',
+        steps: [
+          'Создайте чат и правила (тишина после 23:00)',
+          'Скидывайтесь на общие нужды через онлайн-копилку',
+          'Составьте график уборки'
+        ],
+        problem: 'Сосед не платит — не плати за него, пиши претензию арендодателю.'
+      },
+      'self-employment': {
+        title: '💻 Самозанятость',
+        steps: [
+          'Скачай "Мой налог" и зарегистрируйся.',
+          'Выбивай чек ДО получения денег.',
+          'Плати налог (4% физлица, 6% юрлица) до 28 числа.'
+        ],
+        problem: 'Просят работать "в серую" — это риск штрафа.'
+      },
+      'credit-trap': {
+        title: '💳 Кредитная ловушка',
+        steps: [
+          'Посчитай реальную стоимость (а не "платеж в месяц").',
+          'Не бери новый кредит, чтобы закрыть старый.',
+          'Не можешь платить — проси кредитные каникулы.'
+        ],
+        problem: 'Звонят коллекторы — требуй общения только письменно.'
+      },
+      'paying-taxes': {
+        title: '🪙 Плачу налоги',
+        steps: [
+          'Зайди в ЛК на сайте ФНС или Госуслуги.',
+          'Проверь начисления (нет ли чужой машины).',
+          'Оплати до 1 декабря без комиссии.'
+        ],
+        problem: 'Налог начислили ошибочно — подай заявление на перерасчет.'
+      },
+      'authority-inaction': {
+        title: '🛡️ Бездействие властей',
+        steps: [
+          'Требуй письменный отказ (на словах отказывать не имеют права).',
+          'Подай жалобу через Госуслуги.',
+          'Игнорируют — пиши в прокуратуру.'
+        ],
+        problem: 'Отказываются принимать заявление — отправляй заказным письмом с уведомлением.'
+      },
+      'burnout': {
+        title: '🧠 Выгорание и психика',
+        steps: [
+          'Пройди тест (пропал интерес, нет сил).',
+          'Правило "Стоп-кран" — не принимай глобальных решений сгоряча.',
+          'Сделай микро-шаг сегодня (выспись, отмени встречу).'
+        ],
+        problem: 'Нужна помощь — обратись в ПМПК при вузе или на телефон доверия.'
+      },
+      'basic-health': {
+        title: '🩺 Базовое здоровье',
+        steps: [
+          'Запишись на бесплатную диспансеризацию по ОМС.',
+          'Сдай базовые анализы (кровь, флюорография).',
+          'Сходи к стоматологу.'
+        ],
+        problem: 'Отказывают в поликлинике — звони в страховую компанию (номер на полисе).'
+      },
+      'career-crisis': {
+        title: '💼 Кризис карьеры',
+        steps: [
+          'Проанализируй (что бесит сейчас, что радовало в детстве).',
+          'Оцени ресурсы (можешь уволиться или искать параллельно).',
+          'Сделай микро-шаг (вебинар, фриланс-заказ).'
+        ],
+        problem: 'Страх уйти "в никуда" — протестируй новую сферу на подработке.'
+      },
+      'vacation-without-parents': {
+        title: '✈️ Отпуск без родителей',
+        steps: [
+          'Проверь документы (паспорт, визы, страховка).',
+          'Бронируй жилье только через проверенные сервисы.',
+          'Сохрани контакты посольства и страховой.'
+        ],
+        problem: 'Потерял паспорт — и в полицию, затем в консульство.'
+      },
+      'fraud-protection': {
+        title: '🔒 Защита от мошенников',
+        steps: [
+          'Запомни — настоящий банк не просит код из СМС.',
+          'Сбрось звонок и перезвони сам по номеру с карты.',
+          'Включи двухфакторную аутентификацию в мессенджерах.'
+        ],
+        problem: 'Взломали аккаунт — заверши сессии и предупреди друзей.'
+      },
+      'first-car': {
+        title: '🚗 Первая машина',
+        steps: [
+          'Посчитай бюджет (машина + ОСАГО + налог + ТО + бензин).',
+          'Пробей VIN (залоги, ДТП).',
+          'Подпиши ДКП, передай деньги только после переоформления.'
+        ],
+        problem: 'Машина сломалась — делай экспертизу и пиши претензию.'
+      }
+    };
+
+    function renderDetail(topic) {
+      const data = contentData[topic];
+      if (!data) return;
+
+      detailTitle.textContent = data.title;
+
+      const checklistHtml = data.steps
+        .map(
+          (step, index) => `
+          <div class="checklist-item">
+            <input type="checkbox" id="step-${topic}-${index}" />
+            <label for="step-${topic}-${index}">${step}</label>
+          </div>
+        `
+        )
+        .join('');
+
+      detailContentInner.innerHTML = `
+        <div class="checklist">${checklistHtml}</div>
+        <div class="problem-block">
+          <span class="problem-title">Проблема?</span>
+          ${data.problem}
+        </div>
+      `;
+    }
+
+    // Открытие темы при нажатии на карточку
+    document.querySelectorAll('.card').forEach((card) => {
+      card.addEventListener('click', () => {
+        const topic = card.dataset.topic;
+        renderDetail(topic);
+        mainScreen.classList.add('hidden');
+        detailScreen.classList.remove('hidden');
+      });
+    });
+
+    // Возврат на главный экран
+    backBtn.addEventListener('click', () => {
+      detailScreen.classList.add('hidden');
+      mainScreen.classList.remove('hidden');
+    });
+
+    // ИИ: константа и элементы
+    const OPENROUTER_API_KEY = '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';
+    const aiInput = document.getElementById('ai-input');
+    const aiBtn = document.getElementById('ai-btn');
+    const aiResponse = document.getElementById('ai-response');
+
+    // ИИ: запрос к OpenRouter
+    aiBtn.addEventListener('click', async () => {
+      const userText = aiInput.value.trim();
+      if (!userText) return;
+
+      const currentTitle = detailTitle.textContent;
+
+      aiBtn.classList.add('loading');
+      aiBtn.disabled = true;
+      aiResponse.style.display = 'block';
+      aiResponse.innerHTML = '';
+
+      try {
+        console.log("Отправляю запрос к ИИ...");
+
+        const response = await fetch('http://127.0.0.1:5000/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+            'HTTP-Referer': window.location.origin,
+            'X-Title': 'AdultLife App'
+          },
+          body: JSON.stringify({
+            model: 'nvidia/nemotron-3-nano-30b-a3b:free',
+            messages: [
+              {
+                role: 'system',
+                content: `Ты — экспертный консультант по взрослой жизни. Пользователь находится в разделе "${currentTitle}". Он пишет: ${userText}. Дай ему 3-4 конкретных шага решения проблемы в формате HTML-списка (<ul><li>). Пиши кратко и по делу.`
+              }
+            ]
+          })
+        });
+
+        if (!response.ok) {
+          const errData = await response.json();
+          console.error("Ответ от OpenRouter:", errData);
+          throw new Error('Ошибка ответа от сервера: ' + response.status);
+        }
+
+        const data = await response.json();
+        const aiText = data.choices && data.choices[0] && data.choices[0].message
+          ? data.choices[0].message.content
+          : 'Не удалось получить ответ от ИИ.';
+
+        aiResponse.innerHTML = aiText;
+      } catch (error) {
+        console.error("Детали ошибки ИИ:", error);
+        aiResponse.innerHTML = '<span class="ai-error">ИИ временно недоступен</span>';
+      } finally {
+        aiBtn.classList.remove('loading');
+        aiBtn.disabled = false;
+      }
+    });
+  </script>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" aria-label="Главная">
+      <span>🏠</span>
+      <span>Главная</span>
+    </div>
+    <div class="nav-item" aria-label="Избранное">
+      <span>⭐</span>
+      <span>Избранное</span>
+    </div>
+    <div class="nav-item" aria-label="Профиль">
+      <span>👤</span>
+      <span>Профиль</span>
+    </div>
+  </nav>
+</body>
+</html>
